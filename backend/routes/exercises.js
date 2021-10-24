@@ -28,4 +28,42 @@ router.route("/add").post((req, res) => {
     .catch((err) => res.status(400).json("Error: " + err));
 });
 
+router.route("/:id").delete((req, res) => {
+  Exercise.findByIdAndDelete(req.params.id)
+    .then(() => res.json(`Exercise with id ${req.params.id} deleted.`))
+    .catch((err) => res.status(400).json("Error: " + err));
+});
+
+router.route("/:id").get((req, res) => {
+  Exercise.findById(req.params.id)
+    .then((exercise) => res.json(exercise))
+    .catch((err) => res.status(400).json("Error: " + err));
+});
+
+router.route("/update/:id").post((req, res) => {
+  const updatedExercise = {
+    username: req.body.username,
+    description: req.body.description,
+    duration: req.body.duration,
+    date: req.body.date,
+  };
+  Exercise.findByIdAndUpdate(
+    req.params.id,
+    updatedExercise,
+    { new: true },
+    (err, result) => {
+      if (err) {
+        res.status(400).json(err);
+      } else {
+        const resultData = {
+          data: result,
+          message: "Exercise updated.",
+          result: "success",
+        };
+        res.send(resultData);
+      }
+    }
+  );
+});
+
 module.exports = router;
