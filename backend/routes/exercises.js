@@ -35,23 +35,15 @@ router.route("/:id").delete((req, res) => {
 });
 
 router.route("/delete/:username").delete((req, res) => {
-  Exercise.find({ username: req.params.username })
-    .then((response) => {
-      if (response.length > 0) {
-        Exercise.deleteMany({ username: req.params.username })
-          .then(() => res.json(`Exercises of ${req.params.username} removed.`))
-          .catch((err) => res.status(400).json("Error: " + err));
-      } else {
-        res
-          .status(404)
-          .json(
-            `Exercise with the username of ${req.params.username} not found.`
-          );
+  const username = req.params.username;
+  Exercise.deleteMany({ username: username })
+    .then((findRes) => {
+      if (findRes.deletedCount === 0) {
+        throw new Error("Username not found");
       }
+      res.json(`Exercises of ${username} removed.`);
     })
-    .catch((err) => {
-      res.json(err);
-    });
+    .catch((err) => res.status(404).json("" + err));
 });
 
 router.route("/:id").get((req, res) => {
