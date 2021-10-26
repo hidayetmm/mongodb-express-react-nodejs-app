@@ -11,6 +11,15 @@ const userSchema = new Schema(
       trim: true,
       minlength: 3,
     },
+    password: {
+      type: String,
+      required: true,
+      minlength: 4,
+      select: false,
+    },
+    token: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
