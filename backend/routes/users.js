@@ -35,7 +35,16 @@ router.route("/add").post(async (req, res) => {
 
     newUser.token = token;
 
-    res.status(201).json(newUser);
+    const userResponse = {
+      _id: newUser._id,
+      username: newUser.username,
+      createdAt: newUser.createdAt,
+      updatedAt: newUser.updatedAt,
+      __v: newUser.__v,
+      token: newUser.token,
+    };
+
+    res.status(201).json(userResponse);
   } catch (error) {
     res.json("Error: " + error);
   }
