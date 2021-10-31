@@ -29,9 +29,13 @@ router.route("/add").post(async (req, res) => {
       password: encryptedPassword,
     });
 
-    const token = jwt.sign({ user_id: newUser._id }, process.env.TOKEN_KEY, {
-      expiresIn: "2h",
-    });
+    const token = jwt.sign(
+      { user_id: newUser._id, username },
+      process.env.TOKEN_KEY,
+      {
+        expiresIn: "2h",
+      }
+    );
 
     newUser.token = token;
 
@@ -48,18 +52,43 @@ router.route("/add").post(async (req, res) => {
   } catch (error) {
     res.json("Error: " + error);
   }
+});
 
-  newUser
-    .save()
-    .then((successData) => {
-      const resData = {
-        data: successData,
-        message: "User added!",
-        result: "success",
+router.route("/login").post(async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    // Validate user input
+    if (!(username && password)) {
+      res.status(400).send("All input is required");
+    }
+
+    // Validate if user exist in our database
+    const user = await User.findOne({ username });
+
+    if (user && (await bcrypt.compare(password, user.password))) {
+      // Create token
+
+      const token = jwt.sign({ user_id: user._id }, process.env.TOKEN_KEY, {
+        expiresIn: "2h",
+      });
+      user.token = token;
+
+      const userResponse = {
+        _id: user._id,
+        username: user.username,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        __v: user.__v,
+        token: user.token,
       };
-      res.send(resData);
-    })
-    .catch((err) => res.status(400).json("Error: " + err));
+
+      res.status(200).json(userResponse);
+    }
+    res.status(400).send("Invalid Credentials");
+  } catch (err) {
+    console.log(err);
+  }
 });
 
 module.exports = router;
